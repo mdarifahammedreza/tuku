@@ -130,6 +130,16 @@ scripts/restore.sh backups/finance-<timestamp>.archive.gz   # asks for confirmat
 
 Daily cron: `0 3 * * * cd /home/arise/AREA-51/finace-bot && scripts/backup.sh >> backups/backup.log 2>&1`. Copy `backups/` off the machine regularly.
 
+## Running on a laptop (always on)
+
+```bash
+bash scripts/laptop-always-on.sh
+```
+
+Disables suspend/hibernate (lid close only locks the screen), powers off cleanly at 5% battery, starts Docker at boot, makes Wi-Fi reconnect forever and adds a daily 03:00 backup cron. During a power or internet cut nothing is lost: the battery keeps the laptop up, Telegram retries webhook deliveries for up to 24 hours, and missed reports are sent once the bot is back. A small DC UPS for the router keeps the internet up during load-shedding.
+
+Undo: `sudo rm /etc/systemd/logind.conf.d/10-always-on-server.conf /etc/NetworkManager/conf.d/wifi-powersave-off.conf && sudo systemctl unmask sleep.target suspend.target hibernate.target hybrid-sleep.target`, then remove the line with `crontab -e`.
+
 ## REST API (`/api/v1`)
 
 All endpoints need the session cookie (POST `/auth/login` with `{password}`); mutations must be same-origin. Responses: `{ok: true, data}` or `{ok: false, error: {message, details?}}`. **Request amounts are taka; response amounts are integer poisha.**
