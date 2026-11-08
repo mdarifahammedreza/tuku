@@ -39,7 +39,7 @@ sudo systemctl enable docker containerd
 
 if [ -n "$WIFI" ]; then
   echo "== Wi-Fi '$WIFI': reconnect forever, power saving off"
-  nmcli con mod "$WIFI" connection.autoconnect yes connection.autoconnect-retries 0 connection.autoconnect-priority 100
+  sudo nmcli con mod "$WIFI" connection.autoconnect yes connection.autoconnect-retries 0 connection.autoconnect-priority 100
   printf '[connection]\nwifi.powersave = 2\n' | sudo tee /etc/NetworkManager/conf.d/wifi-powersave-off.conf >/dev/null
 fi
 
