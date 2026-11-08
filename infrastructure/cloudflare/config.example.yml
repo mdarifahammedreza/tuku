@@ -1,0 +1,15 @@
+# Locally-managed tunnel alternative (if you don't use the dashboard-managed TUNNEL_TOKEN).
+# cloudflared tunnel create finance  ->  writes <TUNNEL_ID>.json credentials
+tunnel: <TUNNEL_ID>
+credentials-file: /etc/cloudflared/<TUNNEL_ID>.json
+
+ingress:
+  # Dashboard + Telegram webhook (the web app forwards /api/v1/webhooks/telegram to the bot internally)
+  - hostname: finance.example.com
+    service: http://web:3000
+  # MCP endpoint (separate hostname = separate auth boundary; bearer token required)
+  - hostname: mcp.example.com
+    path: ^/mcp
+    service: http://mcp:8082
+  # Everything else is refused. MongoDB is never routed.
+  - service: http_status:404

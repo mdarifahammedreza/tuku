@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "web-demo",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd apps/web && MONGODB_URI=mongodb://127.0.0.1:27099/finance_demo DASHBOARD_PASSWORD=demo-password-123 SESSION_SECRET=demo-session-secret-0123456789abcdef0123 npx next dev -p 3200"],
+      "port": 3200
+    }
+  ]
+}

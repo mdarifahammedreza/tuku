@@ -1,0 +1,21 @@
+{
+  "name": "finance-bot",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.15.1",
+  "scripts": {
+    "dev:web": "pnpm --filter @finance/web dev",
+    "dev:bot": "pnpm --filter @finance/bot dev",
+    "dev:mcp": "pnpm --filter @finance/mcp dev",
+    "build": "pnpm --filter @finance/web build",
+    "test": "vitest run",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "mongodb-memory-server": "^11.3.0",
+    "tsx": "^4.23.15",
+    "typescript": "5.9.3",
+    "vitest": "^5.1.0"
+  }
+}
