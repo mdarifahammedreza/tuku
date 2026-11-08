@@ -52,6 +52,8 @@ services:
     ports:
       - "127.0.0.1:${MCP_PORT_HOST:-8082}:8082"
 
+  # Host networking so the same tunnel can also reach other local services (e.g. Frigate on 127.0.0.1:8971).
+  # Ingress targets are therefore localhost ports: web 127.0.0.1:3100, mcp 127.0.0.1:8082.
   cloudflared:
     image: cloudflare/cloudflared:2026.10.0
     profiles: [tunnel]
@@ -60,7 +62,7 @@ services:
     environment:
       TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
     depends_on: [web, mcp]
-    networks: [internal]
+    network_mode: host
 
 networks:
   internal:

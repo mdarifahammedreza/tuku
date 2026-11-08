@@ -115,9 +115,9 @@ Locally the HTTP endpoint is `http://127.0.0.1:8082/mcp`. It is stateless (POST 
 Only needed to reach the dashboard / webhook / MCP from outside this machine.
 
 1. Cloudflare dashboard → Zero Trust → Networks → Tunnels → create tunnel, copy the token into `CLOUDFLARE_TUNNEL_TOKEN`.
-2. Public hostnames: `finance.<domain>` → `http://web:3000`; `mcp.<domain>` → `http://mcp:8082` (path `^/mcp`). Do not add MongoDB.
+2. Public hostnames (cloudflared uses host networking): `tuku.<domain>` → `http://localhost:3100` (dashboard + webhook); `tuku-api.<domain>` → `http://localhost:8082` (MCP). Do not add MongoDB. Other local services can share the tunnel, e.g. Frigate: `cctv.<domain>` → `https://localhost:8971` with "No TLS Verify" (port 8971 requires login; never expose Frigate's unauthenticated port 5000).
 3. `docker compose --profile tunnel up -d`
-4. For Telegram webhooks set `TELEGRAM_MODE=webhook`, `TELEGRAM_WEBHOOK_URL=https://finance.<domain>/api/v1/webhooks/telegram`, then `docker compose up -d`. The web app forwards that path to the bot, which checks the secret header.
+4. For Telegram webhooks set `TELEGRAM_MODE=webhook`, `TELEGRAM_WEBHOOK_URL=https://tuku.<domain>/api/v1/webhooks/telegram`, then `docker compose up -d`. The web app forwards that path to the bot, which checks the secret header.
 
 Locally-managed alternative: `infrastructure/cloudflare/config.example.yml`. Optionally add Cloudflare Access in front of the dashboard hostname (not the webhook or MCP hostnames).
 
