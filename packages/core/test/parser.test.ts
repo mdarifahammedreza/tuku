@@ -17,6 +17,8 @@ describe("parser: compact expenses", () => {
     ["cha ৳15", 1500, "Cha", "food"],
     ["alu30tk", 3000, "Alu", "groceries"],
     ["paid 10000 rent", 1000000, "Rent", "housing"],
+    ["barivara: 9000 tk", 900000, "Barivara", "housing"],
+    ["bari vara 9000", 900000, "Bari vara", "housing"],
     ["alu 2 kg 60", 6000, "Alu 2 kg", "groceries"],
     ["medicine 1.5k", 150000, "Medicine", "health"],
     ["internet bill 1,200 tk", 120000, "Internet bill", "utilities"],
