@@ -28,9 +28,9 @@ export function createBot(token: string, allow: Set<number>) {
 
   bot.command("start", async (ctx) => {
     await h.registerChat(ctx.chat.id);
-    await reply(ctx, `Assalamu alaikum! I'll record your income and expenses.\nReports will be sent to this chat.\n\n${h.HELP}`);
+    await reply(ctx, await h.helpText());
   });
-  bot.command("help", (ctx) => reply(ctx, h.HELP));
+  bot.command("help", async (ctx) => reply(ctx, await h.helpText()));
   bot.command("balance", async (ctx) => reply(ctx, await h.balanceText()));
   bot.command("today", async (ctx) => reply(ctx, await h.periodText("today")));
   bot.command("week", async (ctx) => reply(ctx, await h.periodText("week")));

@@ -218,6 +218,11 @@ export async function registerChat(chatId: number) {
   await Profile.updateOne({ key: "default" }, { $set: { "reporting.chatId": chatId } });
 }
 
+/** /start and /help: greeting, how to record, commands, then the full category dictionary. */
+export async function helpText() {
+  return `Assalamu alaikum! I'll record your income and expenses.\nReports will be sent to this chat.\n\n${HELP}\n\n${await categoriesText()}`;
+}
+
 export const HELP = `<b>Record money by just typing:</b>
 alu 30
 poratha 30 taka

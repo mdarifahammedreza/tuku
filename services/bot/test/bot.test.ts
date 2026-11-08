@@ -75,6 +75,10 @@ describe("/categories", () => {
     expect(t).toContain("barivara");
     expect(t).toContain("rickshaw");
     expect(t).toContain("kacchi");
+    const help = await h.helpText();
+    expect(help).toContain("Assalamu alaikum");
+    expect(help).toContain("/balance");
+    expect(help).toContain("barivara");
   });
 });
 
