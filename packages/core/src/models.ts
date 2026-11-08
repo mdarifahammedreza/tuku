@@ -112,6 +112,7 @@ const reportSchema = new Schema(
     data: Schema.Types.Mixed,
     dataHash: String,
     aiAnalysis: String,
+    aiSource: String, // "api" (automatic) or "claude-desktop" (saved via MCP)
     aiError: String,
     generatedAt: Date,
     deliveryStatus: { type: String, enum: ["pending", "delivering", "delivered", "failed", "skipped"], default: "pending" },

@@ -11,7 +11,7 @@ function Analysis({ r, kind }: { r: any; kind: string }) {
   if (!r) return <Empty>No {kind} analysis yet</Empty>;
   return (
     <div>
-      <div className="mb-3 text-xs text-muted">Period {r.periodKey.split(":")[1]} · generated {new Date(r.generatedAt).toLocaleString("en-GB", { timeZone: "Asia/Dhaka", dateStyle: "medium", timeStyle: "short" })}</div>
+      <div className="mb-3 text-xs text-muted">Period {r.periodKey.split(":")[1]} · {r.aiSource === "claude-desktop" ? "saved from Claude Desktop" : "generated"} {new Date(r.generatedAt).toLocaleString("en-GB", { timeZone: "Asia/Dhaka", dateStyle: "medium", timeStyle: "short" })}</div>
       <div className="whitespace-pre-wrap text-sm leading-relaxed text-fg">{r.aiAnalysis}</div>
     </div>
   );
@@ -25,7 +25,12 @@ export default async function InsightsPage() {
   return (
     <>
       <PageHeader title="AI Insights" description="Claude analyses pre-computed totals only — all figures come from the ledger." action={<GenerateButtons enabled={d.aiConfigured} />} />
-      {!d.aiConfigured && <p className="mb-4 rounded-lg border border-warn/30 bg-warn/8 px-3 py-2 text-sm text-warn">Set ANTHROPIC_API_KEY to enable Claude analysis. Reports still work without it.</p>}
+      {!d.aiConfigured && (
+        <p className="mb-4 rounded-lg border border-accent/30 bg-accent/8 px-3 py-2 text-sm text-fg-2">
+          No API key needed: in Claude Desktop ask <i>“Analyse my month with get_monthly_report and save it with save_insight”</i>. It appears here and in the Telegram report.
+          Set <code>ANTHROPIC_API_KEY</code> instead for automatic weekly/monthly analysis.
+        </p>
+      )}
       <div className="grid gap-4 lg:grid-cols-2">
         <Card><CardHeader title={<span className="flex items-center gap-1.5"><Sparkles className="h-4 w-4 text-accent" /> Monthly analysis</span>} /><CardBody><Analysis r={d.monthly} kind="monthly" /></CardBody></Card>
         <Card><CardHeader title={<span className="flex items-center gap-1.5"><Sparkles className="h-4 w-4 text-accent" /> Weekly analysis</span>} /><CardBody><Analysis r={d.weekly} kind="weekly" /></CardBody></Card>

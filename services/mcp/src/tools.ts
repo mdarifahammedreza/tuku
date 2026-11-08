@@ -6,7 +6,7 @@ import {
   CATEGORIES, Confirmation, FinanceError, budgetStatus, buildMonthly, buildWeekly, categoryTrends, correctTransaction, createSavingsGoal,
   currentMonthPeriod, dailySeries, dayPeriod, dhakaMidnight, dhakaParts, getBalances, getLoanSummary, getProfile, getSummary, getTransaction,
   inTaka, last7DaysPeriod, listAccounts, listTransactions, monthPeriod, objectId, previousMonthPeriod, reverseTransaction, savingsProgress,
-  setBudget, topExpenses, transactionPatch, type Period, TX_TYPES, goalInput, plain,
+  saveInsight, setBudget, topExpenses, transactionPatch, type Period, TX_TYPES, goalInput, plain,
 } from "@finance/core";
 
 const PERIODS = ["today", "last_7_days", "this_month", "last_month"] as const;
@@ -276,6 +276,27 @@ export function createMcpServer() {
   }, wrap((a: any) => {
     const input = goalInput.parse({ name: a.name, targetAmount: a.target_amount, accountId: a.account_id, deadline: a.deadline });
     return confirmable("create_savings_goal", a, async () => input, () => createSavingsGoal(input, "mcp"));
+  }));
+
+  // Lets Claude Desktop publish its own analysis to the dashboard and Telegram reports (no API key needed).
+  server.registerTool("save_insight", {
+    title: "Save analysis to dashboard",
+    description:
+      "Save your financial analysis so it appears on the dashboard's AI Insights page and in the Telegram report. " +
+      "First read get_weekly_report or get_monthly_report and base every number on it. type=weekly covers the last 7 days; " +
+      "type=monthly covers year/month (default: current month). Plain text, short CAPS headings, '•' bullets, no markdown.",
+    inputSchema: {
+      type: z.enum(["weekly", "monthly"]),
+      analysis: z.string().trim().min(20).max(8000),
+      year: z.number().int().min(2000).max(2100).optional(),
+      month: z.number().int().min(1).max(12).optional(),
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  }, wrap(async (a) => {
+    const now = dhakaParts(new Date());
+    const period = a.type === "weekly" ? last7DaysPeriod() : monthPeriod(a.year ?? now.year, a.month ?? now.month);
+    const r = await saveInsight(a.type, period, a.analysis);
+    return { saved: true, periodKey: r!.periodKey, shownOn: "Dashboard → AI Insights" };
   }));
 
   // ---- resources ----

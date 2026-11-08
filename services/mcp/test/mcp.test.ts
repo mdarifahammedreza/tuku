@@ -23,9 +23,9 @@ async function seed() {
 }
 
 describe("MCP tools", () => {
-  it("lists all 16 tools and 4 resources", async () => {
+  it("lists all 17 tools and 4 resources", async () => {
     const c = await client();
-    expect((await c.listTools()).tools.map((t) => t.name).sort()).toHaveLength(16);
+    expect((await c.listTools()).tools.map((t) => t.name).sort()).toHaveLength(17);
     expect((await c.listResources()).resources.map((r) => r.uri).sort()).toEqual(["finance://accounts", "finance://current-budgets", "finance://current-month", "finance://profile"]);
   });
 
@@ -81,6 +81,22 @@ describe("MCP tools", () => {
     const gp = await call(c, "create_savings_goal", g);
     await call(c, "create_savings_goal", { ...g, confirm_token: gp.structuredContent.confirm_token });
     expect((await call(c, "get_savings_progress")).structuredContent.goals[0]).toMatchObject({ name: "Laptop", target: 80000 });
+  });
+});
+
+describe("save_insight", () => {
+  it("stores Claude Desktop analysis on the report and keeps it when figures are rebuilt", async () => {
+    await seed();
+    const c = await client();
+    const r = await call(c, "save_insight", { type: "monthly", analysis: "SUMMARY\n• Rent is 98% of spending this month." });
+    expect(r.structuredContent).toMatchObject({ saved: true });
+    const { Report, generateReport, currentMonthPeriod } = await import("@finance/core");
+    const doc = await Report.findOne({ reportType: "monthly" }).lean();
+    expect(doc).toMatchObject({ aiSource: "claude-desktop" });
+    expect(doc!.aiAnalysis).toContain("Rent is 98%");
+    const again = await generateReport("monthly", currentMonthPeriod());
+    expect(again.text).toContain("Rent is 98%");
+    expect((await call(c, "save_insight", { type: "weekly", analysis: "short" })).isError).toBe(true);
   });
 });
 

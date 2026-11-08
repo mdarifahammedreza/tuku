@@ -199,14 +199,18 @@ export async function generateReport(type: ReportType, period: Period, opts: { w
   const dataHash = hashData(data);
   let aiAnalysis = existing.dataHash === dataHash ? existing.aiAnalysis : undefined;
   let aiError: string | undefined;
+  let freshAI = false;
   if (type !== "daily" && opts.withAI !== false && !aiAnalysis && aiEnabled()) {
     try {
       aiAnalysis = await analyze(type, toAIInput(data));
+      freshAI = true;
     } catch (err) {
       aiError = describeAIError(err);
       console.error(JSON.stringify({ level: "error", msg: "claude_analysis_failed", reportType: type, period: period.label, error: aiError }));
     }
   }
+  // Without a fresh analysis (no API key, or it failed) keep the last one, e.g. advice saved from Claude Desktop.
+  aiAnalysis = aiAnalysis ?? existing.aiAnalysis ?? undefined;
   const summary = type === "daily" ? null : data.summary;
   const report = await Report.findOneAndUpdate(
     { _id: existing._id },
@@ -216,6 +220,7 @@ export async function generateReport(type: ReportType, period: Period, opts: { w
         dataHash,
         aiAnalysis: aiAnalysis ?? null,
         aiError: aiError ?? null,
+        ...(freshAI && { aiSource: "api" }),
         generatedAt: new Date(),
         totalIncome: type === "daily" ? data.todayIncome : summary.income,
         totalExpenses: type === "daily" ? data.todayExpenses : summary.expenses,
@@ -228,6 +233,16 @@ export async function generateReport(type: ReportType, period: Period, opts: { w
   ).lean();
   const text = type === "daily" ? formatDaily(data) : type === "weekly" ? formatWeekly(data, aiAnalysis) : formatMonthly(data, aiAnalysis);
   return { report, text };
+}
+
+/** Stores analysis written elsewhere (Claude Desktop via the MCP save_insight tool) on the period's report. */
+export async function saveInsight(type: "weekly" | "monthly", period: Period, analysis: string) {
+  const { report } = await generateReport(type, period, { withAI: false });
+  return Report.findOneAndUpdate(
+    { _id: report!._id },
+    { $set: { aiAnalysis: analysis.trim(), aiSource: "claude-desktop", aiError: null, generatedAt: new Date() } },
+    { returnDocument: "after" },
+  ).lean();
 }
 
 export const MAX_ATTEMPTS = 5;
