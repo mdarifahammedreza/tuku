@@ -80,12 +80,21 @@ export async function periodText(which: "today" | "week" | "month") {
   ].filter(Boolean).join("\n");
 }
 
-export function categoriesText() {
+/** Every keyword per category (built-in + the user's own), so the dictionary is never a mystery. */
+export async function categoriesText() {
+  const custom = ((await getProfile()).categoryKeywords ?? {}) as Record<string, string[]>;
+  const lines = CATEGORIES.filter((c) => c.keywords.length || custom[c.id]?.length).map((c) => {
+    const own = custom[c.id]?.length ? `\n  <i>Tomar word:</i> ${escapeHtml(custom[c.id].join(", "))}` : "";
+    return `• <b>${c.label}</b> (${c.id})\n  ${escapeHtml(c.keywords.join(", "))}${own}`;
+  });
   return [
-    "<b>Categories</b> (detected from keywords)",
-    ...CATEGORIES.filter((c) => c.keywords.length).map((c) => `• <b>${c.label}</b> (${c.id}): ${c.keywords.filter((k) => /^[a-z ]+$/.test(k)).slice(0, 6).join(", ")}`),
+    "<b>Category dictionary</b>",
+    "Message-e ei word thakle oi category-te jay.",
     "",
-    "Unknown items go to <b>Other</b>. Fix with /fix category food",
+    ...lines,
+    "",
+    "Kono word na mille <b>Other</b>-e jay. Thik korte: /fix category housing",
+    "Nijer word add korte: dashboard → Settings → Custom category keywords",
   ].join("\n");
 }
 

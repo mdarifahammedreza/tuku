@@ -67,6 +67,17 @@ describe("transaction messages", () => {
   });
 });
 
+describe("/categories", () => {
+  it("lists every built-in keyword and the user's own words", async () => {
+    const { updateProfile } = await import("@finance/core");
+    await updateProfile({ categoryKeywords: { food: ["kacchi"] } }, "web");
+    const t = await h.categoriesText();
+    expect(t).toContain("barivara");
+    expect(t).toContain("rickshaw");
+    expect(t).toContain("kacchi");
+  });
+});
+
 describe("scheduler catch-up", () => {
   it("delivers due reports once to the registered chat", async () => {
     await h.registerChat(42);

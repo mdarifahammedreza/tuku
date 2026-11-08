@@ -35,7 +35,7 @@ export function createBot(token: string, allow: Set<number>) {
   bot.command("today", async (ctx) => reply(ctx, await h.periodText("today")));
   bot.command("week", async (ctx) => reply(ctx, await h.periodText("week")));
   bot.command("month", async (ctx) => reply(ctx, await h.periodText("month")));
-  bot.command("categories", (ctx) => reply(ctx, h.categoriesText()));
+  bot.command("categories", async (ctx) => reply(ctx, await h.categoriesText()));
   bot.command("budget", async (ctx) => reply(ctx, await h.budgetText(args(ctx))));
   bot.command("recent", async (ctx) => reply(ctx, await h.recentText()));
   bot.command("search", async (ctx) => reply(ctx, args(ctx).trim() ? await h.recentText(args(ctx).trim()) : "Usage: /search alu"));
